@@ -1,7 +1,8 @@
 import glfw
 from OpenGL.GL import *
+from abc import ABC, abstractmethod
 
-class Game:
+class Game(ABC):
     def __init__(self, window_width, window_height, window_title):
         self.window_width=window_width
         self.window_height=window_height
@@ -34,14 +35,21 @@ class Game:
 
             self.update()
             self.render()
+        self.terminate()
         glfw.terminate()
 
-
+    @abstractmethod
     def load(self):
         pass
-
+    
+    @abstractmethod
     def update(self):
         pass
 
+    @abstractmethod
     def render(self):
+        pass
+
+    @abstractmethod
+    def terminate(self):
         pass

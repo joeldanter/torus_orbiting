@@ -5,6 +5,8 @@ import numpy as np
 from game import Game
 from camera import Camera
 from Physics.physics_world import PhysicsWorld
+from Physics.bodies import Torus, Sphere
+from threading import Thread
 
 
 class TestGame(Game):
@@ -12,9 +14,14 @@ class TestGame(Game):
         super().__init__(window_width, window_height, window_title)
     
     def load(self):
-        self.camera=Camera(np.array([0.0, 7.0, 13.0]), np.array([0.0, 1.0, 0.0]), -90, -30.0, 60)
-        self.physics_world = PhysicsWorld()
-        self.physics_world.draw_torus(5, 2, 32, 32)
+        self.camera=Camera(np.array([0.0, 7.0, 13.0]), np.array([0.0, 1.0, 0.0]), -90, -30.0, 70)
+        torus = Torus(np.array((0,0,0)), np.array((0,0,0)), 1e+13, 5, 1.5, 16, 32)
+        sphere = Sphere(np.array((7,0,0)), np.array((0,7,1)), 1, 0.4, 16, 16)
+        self.physics_world = PhysicsWorld(torus, sphere)
+        self.thread = Thread(target = self.physics_world.run_alone, args = (0.01,))
+        #self.thread.start()
+        # TODO stop it at the end
+        # TODO go around GIL
 
         glfw.set_key_callback(self.window, self.key_callback)
         glfw.set_scroll_callback(self.window, self.scroll_callback)
@@ -26,6 +33,10 @@ class TestGame(Game):
         self.first_mouse = True
     
     def update(self):
+        # physics
+        #self.physics_world.tick(self.delta_time)
+        #print(self.physics_world.sphere.pos)
+
         # movement, keyboard
         if glfw.get_key(self.window, glfw.KEY_W) == 1:
             self.camera.camera_pos +=self.camera.front *  self.movement_speed * self.delta_time
@@ -59,7 +70,6 @@ class TestGame(Game):
         if self.camera.pitch < -89.0:
             self.camera.pitch = -89.0
 
-    
     def render(self):
         # clear screen
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
@@ -75,12 +85,8 @@ class TestGame(Game):
         gluLookAt(*self.camera.get_look_at_values())
 
         # Draw the objects
-        for object in self.physics_world.quad_stripes:
-            glBegin(GL_QUAD_STRIP)
-            for point in object:
-                glVertex3f(point[0], point[1], point[2])
-                glColor3f(point[3], point[4], point[5])
-            glEnd()
+        self.physics_world.torus.render()
+        self.physics_world.sphere.render()
         
         # Show it to the screen
         glfw.swap_buffers(self.window)
@@ -98,3 +104,7 @@ class TestGame(Game):
     def key_callback(self, window, key, scancode, action, mods):
         if key == 256 and action == 1:
             glfw.set_window_should_close(window, True)
+    
+    def terminate(self):
+        #self.process.terminate()
+        pass
