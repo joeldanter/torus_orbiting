@@ -1,7 +1,6 @@
 import numpy as np
 from scipy.integrate import dblquad
 import time
-import threading
 
 
 class PhysicsWorld:
@@ -25,7 +24,7 @@ class PhysicsWorld:
         print('F:', Fdonut)
         self.torus.apply_force(-Fdonut)
         self.sphere.apply_force(Fdonut)
-        time.sleep(0.1)
+        time.sleep(0.1) # TODO fix this
         self.torus.tick(delta_time)
         self.sphere.tick(delta_time)
 
