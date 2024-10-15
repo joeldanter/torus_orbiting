@@ -1,4 +1,4 @@
-# Simulating orbits in a gravitational field created by a torus
+# Simulating trajectories in a gravitational field created by a torus
 Some cool stuff (dementedness)
 
 ## Installation
