@@ -2,7 +2,6 @@ import numpy as np
 from scipy.integrate import dblquad
 import time
 from multiprocessing import Pool, Process, JoinableQueue
-from threading import Thread
 
 class PhysicsWorld:
     grav_const=6.6743e-11
@@ -12,39 +11,36 @@ class PhysicsWorld:
 
     def run_torus_simulation(self, delta_times):
         # TODO RK4 instead of explicit euler
-        # fasteeeer
+        # TODO fasteeeer
+        # TODO better stopping mechanism
         self.should_stop=False
         q=JoinableQueue(1)
-        p = Process(target=self.donut_loop, args=(q,delta_times))
+        p = Process(target=self.torus_calculating_process, args=(q,delta_times))
         p.start()
         while not self.should_stop:
-        # TODO better stopping mechanizm
             start = time.time()
-            Fdonut=q.get()
+            F=q.get()
 
-            self.torus.apply_force(-Fdonut)
-            self.sphere.apply_force(Fdonut)
+            self.torus.apply_force(-F)
+            self.sphere.apply_force(F)
             self.tick(delta_times)
-            print('F:', Fdonut, 'in', time.time()-start)
+            print(f'F: {F} in {time.time()-start}s')
             
             q.task_done()
 
     def stop(self):
         self.should_stop=True
 
-    def donut_loop(self, queue, delta_times):
+    def torus_calculating_process(self, queue, delta_times):
         while True:
             queue.join()
-            Fdonut=self.donut_force()
-            self.torus.apply_force(-Fdonut)
-            self.sphere.apply_force(Fdonut)
+            F=self.torus_gravitational_force()
+            self.torus.apply_force(-F)
+            self.sphere.apply_force(F)
             self.tick(delta_times)
-            queue.put(Fdonut)
+            queue.put(F)
 
     def tick(self, delta_time):
-        #grav_force=self.grav_accel()
-        #self.torus.apply_force(-grav_force)
-        #self.sphere.apply_force(grav_force)
         self.torus.tick(delta_time)
         self.sphere.tick(delta_time)
 
@@ -56,13 +52,12 @@ class PhysicsWorld:
         grav_dir=vec_dist/dist
         return grav_magnitude*grav_dir
 
-    def donut_force(self):
+    def torus_gravitational_force(self):
         multiplier=self.grav_const*self.sphere.mass*self.torus.mass/self.torus.volume
         x,y,z=self.sphere.pos-self.torus.pos
         R=self.torus.outer_radius
         r=self.torus.inner_radius
 
-        # TODO faster
         '''
         with Pool(processes=3) as pool:
             Fx=pool.starmap_async(self.torus_Fx, ((x,y,z,r,R,multiplier),))
@@ -80,19 +75,11 @@ class PhysicsWorld:
             print(F)
             #return F
         '''
-        #print('sequential init:', time.time()-start)
         
         Fx=self.torus_Fx(x,y,z,r,R,multiplier)
-        #print('x:', time.time()-start)
-
         Fy=self.torus_Fy(x,y,z,r,R,multiplier)
-        #print('y:', time.time()-start)
-        
         Fz=self.torus_Fz(x,y,z,r,R,multiplier)
-        #print('z:', time.time()-start)
-
         F=np.array((Fx,Fy,Fz))
-        #print(F)
         return F
 
     def torus_Fx(self,x,y,z,r,R,multiplier):

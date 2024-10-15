@@ -21,9 +21,6 @@ class TestGame(Game):
         t = Thread(target=self.physics_world.run_torus_simulation, args=(0.1,))
         t.start()
 
-        # TODO stop it at the end
-        # TODO go around GIL
-
         glfw.set_key_callback(self.window, self.key_callback)
         glfw.set_scroll_callback(self.window, self.scroll_callback)
         glfw.set_input_mode(self.window, glfw.CURSOR, glfw.CURSOR_DISABLED)
@@ -35,9 +32,11 @@ class TestGame(Game):
     
     def update(self):
         # physics
+        # normal gravity
+        #grav_force=self.physics_world.grav_accel()
+        #self.physics_world.torus.apply_force(-grav_force)
+        #self.physics_world.sphere.apply_force(grav_force)
         #self.physics_world.tick(self.delta_time)
-        #print(self.physics_world.sphere.pos)
-        #print(self.delta_time)
 
         # movement, keyboard
         if glfw.get_key(self.window, glfw.KEY_W) == 1:
@@ -108,5 +107,4 @@ class TestGame(Game):
             glfw.set_window_should_close(window, True)
     
     def terminate(self):
-        #self.process.terminate()
         self.physics_world.stop()
