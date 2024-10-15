@@ -78,6 +78,23 @@ class Sphere(Body):
                 glVertex3f(point[0]+self.pos[0], point[1]+self.pos[1], point[2]+self.pos[2])
             glEnd()
 
+class TracedSphere(Sphere):
+    def __init__(self, init_pos, init_vel, mass, radius, segments, rings):
+        super().__init__(init_pos, init_vel, mass, radius, segments, rings)
+        self.trace_points=[init_pos]
+    
+    def tick(self, delta_time):
+        super().tick(delta_time)
+        self.trace_points.append(self.pos)
+    
+    def render(self):
+        super().render()
+        glBegin(GL_LINE_STRIP)
+        for point in self.trace_points:
+            glVertex3f(point[0], point[1], point[2])
+        glEnd()
+
+
 class Torus(Body):
     def __init__(self, init_pos, init_vel, mass, outer_radius, inner_radius, sides, rings):
         super().__init__(init_pos, init_vel, mass)

@@ -5,7 +5,7 @@ import numpy as np
 from game import Game
 from camera import Camera
 from Physics.physics_world import PhysicsWorld
-from Physics.bodies import Torus, Sphere
+from Physics.bodies import Torus, TracedSphere
 from threading import Thread
 
 
@@ -16,10 +16,11 @@ class TestGame(Game):
     def load(self):
         self.camera=Camera(np.array([0.0, 7.0, 13.0]), np.array([0.0, 1.0, 0.0]), -90, -30.0, 70)
         torus = Torus(np.array((0,0,0)), np.array((0,0,0)), 1e+13, 5, 1.5, 16, 32)
-        sphere = Sphere(np.array((7,0,0)), np.array((0,7,1)), 1, 0.4, 16, 16)
+        sphere = TracedSphere(np.array((7,0,0)), np.array((0,7,1)), 1, 0.4, 16, 16)
         self.physics_world = PhysicsWorld(torus, sphere)
-        self.thread = Thread(target = self.physics_world.run_alone, args = (0.01,))
-        #self.thread.start()
+        t = Thread(target=self.physics_world.run_torus_simulation, args=(0.1,))
+        t.start()
+
         # TODO stop it at the end
         # TODO go around GIL
 
@@ -36,6 +37,7 @@ class TestGame(Game):
         # physics
         #self.physics_world.tick(self.delta_time)
         #print(self.physics_world.sphere.pos)
+        #print(self.delta_time)
 
         # movement, keyboard
         if glfw.get_key(self.window, glfw.KEY_W) == 1:
@@ -107,4 +109,4 @@ class TestGame(Game):
     
     def terminate(self):
         #self.process.terminate()
-        pass
+        self.physics_world.stop()
