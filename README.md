@@ -1,4 +1,7 @@
-# Installation
+# Simulating orbits in a gravitational field created by a torus
+Some cool stuff (dementedness)
+
+## Installation
 1. Clone the repo
 ```shell
 git clone https://github.com/joeldanter/torus_orbiting.git
@@ -20,11 +23,17 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
-# Usage
+## Running the script
 ```shell
 "./.venv/Scripts/activate"
 python main.py
 ```
 
-# Other
+## Controls
+Movement: `wasd`, `Space`, `LShift`
+Looking around: Mouse
+Zoom: Scroll
+Exit: `Esc`
+
+## Other
 Cool desmos graph: https://www.desmos.com/calculator/lxywgz9tul
