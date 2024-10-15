@@ -30,10 +30,10 @@ python main.py
 ```
 
 ## Controls
-Movement: `wasd`, `Space`, `LShift`
-Looking around: Mouse
-Zoom: Scroll
-Exit: `Esc`
+- Movement: `wasd`, `Space`, `LShift`
+- Looking around: Mouse
+- Zoom: Scroll
+- Exit: `Esc`
 
 ## Other
 Cool desmos graph: https://www.desmos.com/calculator/lxywgz9tul
