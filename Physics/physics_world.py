@@ -17,9 +17,10 @@ class PhysicsWorld:
         F_out_queues=[Queue(), Queue(), Queue()]
         processes=[]
         for i in range(3):
-            p=Process(target=self.F_xyz_process, args=(functions[i], params_queues[i], F_out_queues[i]))
+            p=Process(target=self.torus_Fxyz_process, args=(functions[i], params_queues[i], F_out_queues[i]))
             processes.append(p)
             p.start()
+        
         while not self.should_stop:
             start = time.time()
 
@@ -52,40 +53,40 @@ class PhysicsWorld:
         self.torus.tick(delta_time)
         self.sphere.tick(delta_time)
 
-    def F_xyz_process(self, f, params_in_queue, F_out_queue):
+    def torus_Fxyz_process(self, f, params_in_queue, F_out_queue):
         while True:
             params=params_in_queue.get()
             F=f(*params)
             F_out_queue.put(F)
 
     def torus_Fx(self,x,y,z,r,R,multiplier):
-        return multiplier*dblquad(lambda l,phi:self.x_quad(x,y,z,phi,l,-np.sqrt(r**2-(l-R)**2),np.sqrt(r**2-(l-R)**2)),
+        return multiplier*dblquad(lambda l,phi:self.torus_x_quad(x,y,z,phi,l,-np.sqrt(r**2-(l-R)**2),np.sqrt(r**2-(l-R)**2)),
                                 0, 2*np.pi,
                                 lambda phi: R-r, lambda phi: R+r)[0]
         
     def torus_Fy(self,x,y,z,r,R,multiplier):
-        return multiplier*dblquad(lambda l,phi:self.y_quad(x,y,z,phi,l,-np.sqrt(r**2-(l-R)**2),np.sqrt(r**2-(l-R)**2)),
+        return multiplier*dblquad(lambda l,phi:self.torus_y_quad(x,y,z,phi,l,-np.sqrt(r**2-(l-R)**2),np.sqrt(r**2-(l-R)**2)),
                                 0, 2*np.pi,
                                 lambda phi: R-r, lambda phi: R+r)[0]
     
     def torus_Fz(self,x,y,z,r,R,multiplier):
-        return multiplier*dblquad(lambda l,phi:self.z_quad(x,y,z,phi,l,-np.sqrt(r**2-(l-R)**2),np.sqrt(r**2-(l-R)**2)),
+        return multiplier*dblquad(lambda l,phi:self.torus_z_quad(x,y,z,phi,l,-np.sqrt(r**2-(l-R)**2),np.sqrt(r**2-(l-R)**2)),
                                 0, 2*np.pi,
                                 lambda phi: R-r, lambda phi: R+r)[0]
 
-    def x_quad(self, x,y,z,phi,l,h1,h2):
+    def torus_x_quad(self, x,y,z,phi,l,h1,h2):
         v=(x-l*np.cos(phi))**2+(z-l*np.sin(phi))**2
         a=(h1-y)/(v*np.sqrt((h1-y)**2+v))
         b=(h2-y)/(v*np.sqrt((h2-y)**2+v))
         int=b-a
         return int*l*(l*np.cos(phi)-x)
     
-    def y_quad(self,x,y,z,phi,l,h1,h2):
+    def torus_y_quad(self,x,y,z,phi,l,h1,h2):
         a= -l / np.sqrt((l*np.cos(phi)-x)**2+(h1-y)**2+(l*np.sin(phi)-z)**2)
         b= -l / np.sqrt((l*np.cos(phi)-x)**2+(h2-y)**2+(l*np.sin(phi)-z)**2)
         return b-a
 
-    def z_quad(self, x,y,z,phi,l,h1,h2):
+    def torus_z_quad(self, x,y,z,phi,l,h1,h2):
         v=(x-l*np.cos(phi))**2+(z-l*np.sin(phi))**2
         a=(h1-y)/(v*np.sqrt((h1-y)**2+v))
         b=(h2-y)/(v*np.sqrt((h2-y)**2+v))

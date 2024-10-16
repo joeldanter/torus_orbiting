@@ -16,7 +16,7 @@ class TestGame(Game):
     def load(self):
         self.camera=Camera(np.array([0.0, 7.0, 13.0]), np.array([0.0, 1.0, 0.0]), -90, -30.0, 70)
         torus = Torus(np.array((0,0,0)), np.array((0,0,0)), 1e+13, 5, 1.5, 16, 32)
-        sphere = TracedSphere(np.array((7,0,0)), np.array((0,6,2)), 1, 0.25, 16, 16)
+        sphere = TracedSphere(np.array((7,0,0)), np.array((0,6,2)), 1, 0.2, 16, 16)
         self.physics_world = PhysicsWorld(torus, sphere)
         t = Thread(target=self.physics_world.run_torus_simulation, args=(0.04,))
         t.start()
@@ -31,7 +31,7 @@ class TestGame(Game):
         self.first_mouse = True
     
     def update(self):
-        # physics if not launched at the beginning
+        # physics if it hasn't been launched at the beginning
         #self.physics_world.tick(self.delta_time)
 
         # movement, keyboard
