@@ -90,12 +90,12 @@ class TestGame(Game):
 
     # Zoom
     def scroll_callback(self, window, xoffset, yoffset):
-        if self.camera.fov >= 1.0 and self.camera.fov <= 45.0:
+        if self.camera.fov >= 1.0 and self.camera.fov <= 70.0:
             self.camera.fov -= yoffset
         if self.camera.fov <= 1.0:
             self.camera.fov = 1.0
-        if self.camera.fov >= 45.0:
-            self.camera.fov = 45.0
+        if self.camera.fov >= 70.0:
+            self.camera.fov = 70.0
 
     # Close
     def key_callback(self, window, key, scancode, action, mods):
