@@ -33,7 +33,7 @@ class PhysicsWorld:
                 q.put((x,y,z,r,R,multiplier))
             
             # get results
-            F=np.array((0,0,0))
+            F=np.array((0.0,0.0,0.0))
             for i in range(3):
                 F[i]=F_out_queues[i].get()
             
