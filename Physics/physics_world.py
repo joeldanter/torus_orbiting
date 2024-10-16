@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.integrate import dblquad
 import time
-from multiprocessing import Process, JoinableQueue, Queue
+from multiprocessing import Process, Queue
 
 class PhysicsWorld:
     grav_const=6.6743e-11
