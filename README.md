@@ -1,6 +1,7 @@
 # Simulating trajectories in a gravitational field created by a torus
 
 Some cool stuff (dementedness)
+
 Should have written this in C++
 
 ## Installation
