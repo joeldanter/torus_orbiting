@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.integrate import dblquad
 import time
-from multiprocessing import Pool, Process, JoinableQueue
+from multiprocessing import Process, JoinableQueue, Queue
 
 class PhysicsWorld:
     grav_const=6.6743e-11
@@ -11,76 +11,52 @@ class PhysicsWorld:
 
     def run_torus_simulation(self, delta_times):
         # TODO RK4 instead of explicit euler
-        # TODO fasteeeer
-        # TODO better stopping mechanism
         self.should_stop=False
-        q=JoinableQueue(1)
-        p = Process(target=self.torus_calculating_process, args=(q,delta_times))
-        p.start()
+        functions=[self.torus_Fx, self.torus_Fy, self.torus_Fz]
+        params_queues=[Queue(), Queue(), Queue()]
+        F_out_queues=[Queue(), Queue(), Queue()]
+        processes=[]
+        for i in range(3):
+            p=Process(target=self.F_xyz_process, args=(functions[i], params_queues[i], F_out_queues[i]))
+            processes.append(p)
+            p.start()
         while not self.should_stop:
             start = time.time()
-            F=q.get()
 
+            # put in params
+            multiplier=self.grav_const*self.sphere.mass*self.torus.mass/self.torus.volume
+            x,y,z=self.sphere.pos-self.torus.pos
+            R=self.torus.outer_radius
+            r=self.torus.inner_radius
+            for q in params_queues:
+                q.put((x,y,z,r,R,multiplier))
+            
+            # get results
+            F=np.array((0,0,0))
+            for i in range(3):
+                F[i]=F_out_queues[i].get()
+            
+            # apply results
             self.torus.apply_force(-F)
             self.sphere.apply_force(F)
             self.tick(delta_times)
             print(f'F: {F} in {time.time()-start}s')
-            
-            q.task_done()
+        
+        for p in processes:
+            p.terminate()
 
     def stop(self):
         self.should_stop=True
-
-    def torus_calculating_process(self, queue, delta_times):
-        while True:
-            queue.join()
-            F=self.torus_gravitational_force()
-            self.torus.apply_force(-F)
-            self.sphere.apply_force(F)
-            self.tick(delta_times)
-            queue.put(F)
 
     def tick(self, delta_time):
         self.torus.tick(delta_time)
         self.sphere.tick(delta_time)
 
-    def grav_accel(self):
-        vec_dist=self.torus.pos-self.sphere.pos
-        dist_sq=np.dot(vec_dist, vec_dist)
-        dist=np.sqrt(dist_sq)
-        grav_magnitude=self.grav_const*self.torus.mass*self.sphere.mass/dist_sq
-        grav_dir=vec_dist/dist
-        return grav_magnitude*grav_dir
-
-    def torus_gravitational_force(self):
-        multiplier=self.grav_const*self.sphere.mass*self.torus.mass/self.torus.volume
-        x,y,z=self.sphere.pos-self.torus.pos
-        R=self.torus.outer_radius
-        r=self.torus.inner_radius
-
-        '''
-        with Pool(processes=3) as pool:
-            Fx=pool.starmap_async(self.torus_Fx, ((x,y,z,r,R,multiplier),))
-            Fy=pool.starmap_async(self.torus_Fy, ((x,y,z,r,R,multiplier),))
-            Fz=pool.starmap_async(self.torus_Fz, ((x,y,z,r,R,multiplier),))
-            print('async init:', time.time()-start)
-            Fx.get()
-            print('x:', time.time()-start)
-            Fy.get()
-            print('y:', time.time()-start)
-            Fz.get()
-            print('z:', time.time()-start)
-            F=np.array((Fx.get()[0], Fy.get()[0], Fz.get()[0]))
-            print('Done after ', time.time()-start, 's')
-            print(F)
-            #return F
-        '''
-        
-        Fx=self.torus_Fx(x,y,z,r,R,multiplier)
-        Fy=self.torus_Fy(x,y,z,r,R,multiplier)
-        Fz=self.torus_Fz(x,y,z,r,R,multiplier)
-        F=np.array((Fx,Fy,Fz))
-        return F
+    def F_xyz_process(self, f, params_in_queue, F_out_queue):
+        while True:
+            params=params_in_queue.get()
+            F=f(*params)
+            F_out_queue.put(F)
 
     def torus_Fx(self,x,y,z,r,R,multiplier):
         return multiplier*dblquad(lambda l,phi:self.x_quad(x,y,z,phi,l,-np.sqrt(r**2-(l-R)**2),np.sqrt(r**2-(l-R)**2)),

@@ -4,6 +4,7 @@ from OpenGL.GL import *
 
 
 class Body(ABC):
+    # TODO make this thread safe
     def __init__(self, init_pos, init_vel, mass):
         self.pos=init_pos
         self.vel=init_vel

@@ -16,9 +16,9 @@ class TestGame(Game):
     def load(self):
         self.camera=Camera(np.array([0.0, 7.0, 13.0]), np.array([0.0, 1.0, 0.0]), -90, -30.0, 70)
         torus = Torus(np.array((0,0,0)), np.array((0,0,0)), 1e+13, 5, 1.5, 16, 32)
-        sphere = TracedSphere(np.array((7,0,0)), np.array((0,7,1)), 1, 0.4, 16, 16)
+        sphere = TracedSphere(np.array((7,0,0)), np.array((0,6,2)), 1, 0.25, 16, 16)
         self.physics_world = PhysicsWorld(torus, sphere)
-        t = Thread(target=self.physics_world.run_torus_simulation, args=(0.1,))
+        t = Thread(target=self.physics_world.run_torus_simulation, args=(0.04,))
         t.start()
 
         glfw.set_key_callback(self.window, self.key_callback)
@@ -31,11 +31,7 @@ class TestGame(Game):
         self.first_mouse = True
     
     def update(self):
-        # physics
-        # normal gravity
-        #grav_force=self.physics_world.grav_accel()
-        #self.physics_world.torus.apply_force(-grav_force)
-        #self.physics_world.sphere.apply_force(grav_force)
+        # physics if not launched at the beginning
         #self.physics_world.tick(self.delta_time)
 
         # movement, keyboard
