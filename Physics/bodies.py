@@ -10,19 +10,22 @@ class Body(ABC):
         self.vel=init_vel
         self.mass=mass
         self.accel=np.array((0.0,0.0,0.0))
+        self.next_accel=np.array((0.0,0.0,0.0))
         # TODO add rotation
     
-    def tick(self, delta_time):
-        # TODO remove the need for giving dt in params
-        self.vel=self.vel+self.accel*delta_time
-        self.pos=self.pos+self.vel*delta_time
-        self.accel=np.array((0.0,0.0,0.0))
+    def update_pos(self, delta_time):
+        self.pos=self.pos + self.vel*delta_time + self.accel*0.5*delta_time**2
+
+    def update_vel(self, delta_time):
+        self.vel=self.vel + (self.accel+self.next_accel)*0.5*delta_time
+        self.accel=self.next_accel
+        self.next_accel=np.array((0.0,0.0,0.0))
 
     def apply_force(self, force):
-        self.accel=self.accel+force/self.mass
+        self.next_accel=self.next_accel+force/self.mass
 
     def apply_accel(self, accel):
-        self.accel=self.accel+accel
+        self.next_accel=self.next_accel+accel
 
     @abstractmethod
     def render(self):
@@ -84,8 +87,8 @@ class TracedSphere(Sphere):
         super().__init__(init_pos, init_vel, mass, radius, segments, rings)
         self.trace_points=[init_pos]
     
-    def tick(self, delta_time):
-        super().tick(delta_time)
+    def update_pos(self, delta_time):
+        super().update_pos(delta_time)
         self.trace_points.append(self.pos)
     
     def render(self):

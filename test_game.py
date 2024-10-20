@@ -4,7 +4,7 @@ from OpenGL.GLU import *
 import numpy as np
 from game import Game
 from camera import Camera
-from Physics.physics_world import PhysicsWorld
+from Physics.torus_gravity_simulation import TorusGravitySimulation
 from Physics.bodies import Torus, TracedSphere
 from threading import Thread
 
@@ -17,8 +17,8 @@ class TestGame(Game):
         self.camera=Camera(np.array([0.0, 7.0, 13.0]), np.array([0.0, 1.0, 0.0]), -90, -30.0, 70)
         torus = Torus(np.array((0,0,0)), np.array((0,0,0)), 1e+13, 5, 1.5, 16, 32)
         sphere = TracedSphere(np.array((7,0,0)), np.array((0,6,2)), 1, 0.2, 16, 16)
-        self.physics_world = PhysicsWorld(torus, sphere)
-        t = Thread(target=self.physics_world.run_torus_simulation, args=(0.04,))
+        self.physics_world = TorusGravitySimulation(torus, sphere)
+        t = Thread(target=self.physics_world.run_simulation, args=(0.04,))
         t.start()
 
         glfw.set_key_callback(self.window, self.key_callback)
@@ -31,9 +31,6 @@ class TestGame(Game):
         self.first_mouse = True
     
     def update(self):
-        # physics if it hasn't been launched at the beginning
-        #self.physics_world.tick(self.delta_time)
-
         # movement, keyboard
         if glfw.get_key(self.window, glfw.KEY_W) == 1:
             self.camera.camera_pos +=self.camera.front *  self.movement_speed * self.delta_time
